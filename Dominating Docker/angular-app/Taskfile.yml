@@ -1,0 +1,28 @@
+version: "3"
+
+tasks:
+  run-application:
+    cmds:
+    - ng serve
+  build-application:
+    cmds:
+      - ng b
+  create-dockerfile:
+    cmds:
+      - echo FROM node:20-alpine AS build-stage > Dockerfile
+      - echo WORKDIR /app >> Dockerfile
+      - echo COPY package*.json /app/ >> Dockerfile
+      - echo RUN npm install >> Dockerfile
+      - echo COPY . /app >> Dockerfile
+      - echo RUN npm run build >> Dockerfile
+      - echo FROM nginx:alpine AS publish-stage >> Dockerfile
+      - echo ARG appname=angular-app >> Dockerfile
+      - echo COPY --from=build-stage /app/dist/\$appname/browser/ /usr/share/nginx/html >> Dockerfile
+      - echo EXPOSE 80 >> Dockerfile
+      - echo "CMD [\"nginx\", \"-g\", \"daemon off;\"]" >> Dockerfile
+  build-docker-application:
+    cmds:
+    - docker build -t angular-app:latest .
+  run-docker-application:
+    cmds:
+      - docker run -d -p 8082:80 --name my-spa angular-app

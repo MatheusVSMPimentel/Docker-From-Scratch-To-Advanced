@@ -1,0 +1,135 @@
+version: "3"
+
+tasks:
+  install-minikube:
+    desc: "Install Minikube on WSL"
+    cmds:
+      - wsl -e sh -c "curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && sudo install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-amd64"
+  start-minikube:
+    cmds:
+      - wsl -e sh -c "minikube start"
+  install-kubectl:
+    cmds:
+      - wsl -e sh -c "minikube kubectl -- get po -A"
+  install-kompose:
+    cmds:
+      - wsl -e sh -c "curl -L https://github.com/kubernetes/kompose/releases/download/v1.34.0/kompose-linux-amd64 -o kompose"
+      - wsl -e sh -c "sudo mv ./kompose /usr/local/bin/kompose"
+  alias-kubectl:
+    cmds:
+      - wsl -e sh -c "alias kubectl=\"minikube kubectl --\""
+  get-kubectl:
+    cmds:
+      - wsl -e sh -c "kubectl get po -A"
+  get-minikube-dashboard:
+    cmds:
+      - wsl -e sh -c "minikube dashboard"
+  create-nginx-deployment-minikube:
+    cmds:
+      - wsl -e sh -c "kubectl create deployment nginx --image=nginx"
+  expose-nginx-deployment-minikube:
+    cmds:
+      - wsl -e sh -c "kubectl expose deployment nginx --type=NodePort --port=80"
+  create-tunnel-nginx-minikube:
+    cmds:
+      - wsl -e sh -c "minikube service nginx"
+  download-dev-io-docker-composer-wsl:
+    cmds:
+      - wsl -e sh -c "wget https://raw.githubusercontent.com/desenvolvedor-io/curso-angular-avancado/master/docker-compose.yml"
+  kompose-convert:
+    cmds:
+      - wsl -e sh -c "kompose convert"
+  apply-kubectl-for-services-kompose-files:
+    desc: "Search folder and apply for all *-service.yaml files"
+    cmds:
+      - |
+        wsl -e bash -c "
+        for file in \$(find . -name '*-service.yaml'); do
+          kubectl apply -f \$file
+        done"
+      - task: apply-kubectl-for-deployment-kompose-files
+  apply-kubectl-for-deployment-kompose-files:
+    desc: "Search folder and apply for all *-deployment.yaml files"
+    cmds:
+      - |
+        wsl -e bash -c "
+        for file in \$(find . -name '*-deployment.yaml'); do
+          kubectl apply -f \$file
+        done"
+  create-tunnel-to-api-kompose:
+    cmds:
+      - wsl -e sh -c "minikube service api"
+  create-tunnel-to-client-kompose:
+    cmds:
+      - wsl -e sh -c "minikube service client"
+  check-kubernetes-docker-install-machine:
+    desc: Go on docker desktop active the kubernetes into docker
+    cmds:
+      - kubectl
+  check-kubernetes-docker-install-wsl:
+    desc: Go on docker desktop active the kubernetes into docker
+    cmds:
+      - wsl -e sh -c "kubectl"
+  get-kubernetes-config-contexts:
+    cmds:
+      - wsl -e sh -c "kubectl config get-contexts"
+  change-kubernetes-config-contexts:
+    cmds:
+      - wsl -e sh -c "kubectl config use-context docker-desktop"
+  kubernetes-deploy-nginx:
+    cmds:
+      - wsl -e sh -c "kubectl create deployment nginx --image=nginx"
+  kubernetes-expose-deploy-nginx:
+    cmds:
+      - wsl -e sh -c "kubectl expose deployment nginx --type=NodePort --port=80"
+  get-kubernetes-service-nginx:
+    cmds:
+      - wsl -e sh -c "kubectl get service nginx"
+  install-helm-into-wsl:
+    cmds:
+      - wsl -e sh -c "sudo apt-get update"
+      - wsl -e sh -c "sudo apt-get install -y wget"
+      - wsl -e sh -c "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3"
+      - wsl -e sh -c "chmod +x get_helm.sh"
+      - wsl -e sh -c "./get_helm.sh"
+      - wsl -e sh -c "helm version"
+  install-kubernetes-dashboard:
+    cmds:
+      - wsl -e sh -c "helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/"
+      - wsl -e sh -c "helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard"
+  run-kubernetes-dashboard:
+    cmds:
+      - wsl -e sh -c "kubectl proxy"
+  run-kubernetes-dashboard-command-from-cli:
+    cmds:
+      - wsl -e sh -c "kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443"
+  generate-token-for-dashboard:
+    cmds:
+      - wsl -e sh -c "kubectl -n NAMESPACE create token SERVICE_ACCOUNT"
+  generate-yaml-for-dashboard:
+    cmds:
+      - 'wsl -e sh -c "echo apiVersion: v1 > dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo kind: ServiceAccount >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo metadata: >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo \"  name: admin-user\" >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo \"  namespace: kubernetes-dashboard\" >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo \" \n--- \n \" >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo \"apiVersion: rbac.authorization.k8s.io/v1\" >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo \"kind: ClusterRoleBinding\" >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo metadata: >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo \"  name: admin-user\" >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo roleRef: >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo \"  apiGroup: rbac.authorization.k8s.io\" >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo \"  kind: ClusterRole\" >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo \"  name: cluster-admin\" >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo subjects: >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo \"  - kind: ServiceAccount\" >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo \"    name: admin-user\" >> dashboard-adminuser.yaml"'
+      - 'wsl -e sh -c "echo \"    namespace: kubernetes-dashboard\" >> dashboard-adminuser.yaml"'
+  apply-dashboard-yaml:
+    cmds:
+    - kubectl apply -f dashboard-adminuser.yaml
+  create-token-for-admin-user-created:
+    cmds:
+    - kubectl -n kubernetes-dashboard create token admin-user
+

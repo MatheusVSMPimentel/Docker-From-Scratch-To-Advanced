@@ -1,0 +1,134 @@
+version: '3'
+
+tasks:
+  hello:
+    cmds:
+      - echo 'Hello World from Task!'
+    silent: true
+  hello-docker:
+    cmds:
+    - docker run docker/welcome-to-docker:latest
+  hello-docker-detached:
+    cmds:
+    - docker run -d docker/welcome-to-docker:latest 
+  hello-docker-detached-accessible:
+    cmds:
+    - docker run -d -p 8088:80 docker/welcome-to-docker:latest
+  hello-docker-named: 
+  # try run 2 times
+    cmds:
+    - docker run --name my-container -d -p 8088:80 docker/welcome-to-docker:latest 
+  start-hello-docker-named:
+    cmds:
+    - docker start my-container
+  start-hello-docker-named-by-id:
+    cmds:
+    - docker start 00e9e246203511d50b346400cb04d9a34ba5d8a4f5bccd66b5f7b980d222437c
+  list-all-containers:
+    cmds:
+    - docker ps -a
+  list-active-containers:
+    cmds:
+    - docker ps
+  pull-nginx:
+    cmds:
+    - docker pull nginx
+  push-image:
+    cmds:
+    - docker push nginx
+  list-stats:
+    cmds:
+    - docker stats
+  exec-container-shell:
+    cmds:
+    - docker exec -it my-container /bin/sh
+    ## Go to nginx share file cd usr/share/nginx/html
+  log-container:
+    cmds:
+    - docker logs my-container
+  inspect-container:
+    cmds:
+    - docker inspect my-container
+  copy-container-file:
+    cmds:
+    - docker cp my-container:usr/share/nginx/html/index.html index.html
+  pull-asp.net-image:
+    cmds:
+    - docker pull mcr.microsoft.com/dotnet/aspnet
+  list-images:
+    cmds:
+    - docker images
+  list-all-images:
+    cmds:
+    - docker images -a
+  save-local-image:
+    cmds:
+    - docker save -o "./myImage.tar" docker/welcome-to-docker
+  save-local-image-by-id:
+  # get the id list all images 
+    cmds:
+    - docker save -o "./myImage.tar" c1f619b6477e 
+  load-local-image:
+  # try save image by name and by id separatly and see the result
+    cmds:
+    - docker load -i "./myImage.tar"
+  tag-a-name-to-image-load-by-id:
+    cmds:
+    - docker tag c1f619b6477e load-image:latest
+  run-tagged-named: 
+    cmds:
+    - docker run --name my-container -d -p 8088:80 load-image:latest 
+    #access http://localhost:8088/
+  remove-nginx-image:
+    cmds:
+    - docker rmi nginx
+  remove-nginx-image-by-id:
+  # list image id  with task list-all-images
+    cmds:
+    - docker rmi 5ef79149e0ec
+  remove-all-dangling-images:
+    cmds:
+    - docker image prune
+  remove-all-images:
+    cmds:
+    - docker image prune -a
+  list-network:
+    cmds:
+    - docker network ls
+  run-nginx:
+    cmds:
+    - docker run --name nginx -d nginx
+  inspect-bridge-network:
+    cmds:
+    - docker network inspect bridge
+  inspect-my-network-network:
+    cmds:
+    - docker network inspect bridge
+  create-network:
+    cmds:
+    - docker network create --driver bridge my-network
+  run-nginx-in-my-network:
+    cmds:
+    - docker run --name nginx2 --network my-network -d nginx
+  remove-network:
+    cmds:
+    # if have a any container running you'll have to disconnect before remove connections
+    - docker network rm my-network
+  disconnect-network-nginx2:
+    cmds:
+    - docker network disconnect my-network nginx2
+  disconnect-bridge-nginx2:
+    cmds:
+    - docker network disconnect bridge nginx2
+  connect-network-nginx2:
+    cmds:
+    - docker network connect my-network nginx2
+  connect-bridge-nginx2:
+    cmds:
+    - docker network connect bridge nginx2
+  compose-fullstack-application:
+    cmds:
+    - docker-compose -f ./Angular-Project-Image/docker-compose.fullstack.yml up
+  run-nginx-with-volume: 
+    cmds:
+    - docker run --name nginx-demo -d -p 8088:80 -v ./index.html:/usr/share/nginx/html:ro nginx

@@ -1,0 +1,73 @@
+version: "3"
+
+tasks:
+  create-dockerfile:
+    cmds:
+      - echo FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base > Dockerfile
+      - echo WORKDIR /app >> Dockerfile
+      - echo EXPOSE 8080 >> Dockerfile
+      - echo EXPOSE 8081 >> Dockerfile
+      - echo FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build >> Dockerfile
+      - echo ARG BUILD_CONFIGURATION=Release >> Dockerfile
+      - echo WORKDIR /src >> Dockerfile
+      - echo COPY [\"app-dotnet.csproj\", \".\"] >> Dockerfile
+      - echo RUN dotnet restore \"app-dotnet.csproj\" >> Dockerfile
+      - echo COPY . . >> Dockerfile
+      - echo WORKDIR \"/src/.\" >> Dockerfile
+      - echo RUN dotnet build \"app-dotnet.csproj\" -c \$BUILD_CONFIGURATION -o /app/build >> Dockerfile
+      - echo FROM build AS publish >> Dockerfile
+      - echo ARG BUILD_CONFIGURATION=Release >> Dockerfile
+      - echo RUN dotnet publish \"app-dotnet.csproj\" -c \$BUILD_CONFIGURATION -o /app/publish >> Dockerfile
+      - echo FROM base AS final >> Dockerfile
+      - echo WORKDIR /app >> Dockerfile
+      - echo COPY --from=publish /app/publish . >> Dockerfile
+      - echo ENTRYPOINT [\"dotnet\", \"app-dotnet.dll\"] >> Dockerfile
+  build-application:
+    cmds:
+      - docker build -t aspnet-app:latest .
+  run-application:
+    cmds:
+      - docker run -d -p 8080:8080 --name my-aspnet-app aspnet-app
+      - task: delayed-task
+      - task: open-project-swagger-on-edge
+  find-service-using-8080-port:
+    cmds:
+      - netstat -a -n -o | findstr 8080
+  get-PID-process-name:
+    cmds:
+      - tasklist | findstr <PID>
+  kill-process-by-PID:
+    cmds:
+      - taskkill /PID <PID> /F
+  recreate-dockerfile:
+    cmds:
+      - echo FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base > Dockerfile
+      - echo WORKDIR /app >> Dockerfile
+      - echo EXPOSE 8080 >> Dockerfile
+      - echo FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build >> Dockerfile
+      - echo ARG BUILD_CONFIGURATION=Release >> Dockerfile
+      - echo WORKDIR /src >> Dockerfile
+      - echo COPY [\"app-dotnet.csproj\", \".\"] >> Dockerfile
+      - echo RUN dotnet restore \"app-dotnet.csproj\" >> Dockerfile
+      - echo COPY . . >> Dockerfile
+      - echo WORKDIR \"/src/.\" >> Dockerfile
+      - echo RUN dotnet build \"app-dotnet.csproj\" -c \$BUILD_CONFIGURATION -o /app/build >> Dockerfile
+      - echo FROM build AS publish >> Dockerfile
+      - echo ARG BUILD_CONFIGURATION=Release >> Dockerfile
+      - echo RUN dotnet publish \"app-dotnet.csproj\" -c \$BUILD_CONFIGURATION -o /app/publish >> Dockerfile
+      - echo FROM base AS final >> Dockerfile
+      - echo ENV ASPNETCORE_URLS=\"http://+:8080\" >> Dockerfile
+      - echo ENV ASPNETCORE_ENVIRONMENT=\"Development\" >> Dockerfile
+      - echo COPY --from=publish /app/publish . >> Dockerfile
+      - echo ENTRYPOINT [\"dotnet\", \"app-dotnet.dll\"] >> Dockerfile
+  install-nSwagger:
+    cmds:
+    - dotnet add package Swashbuckle.AspNetCore
+    - dotnet add package NSwag.AspNetCore 
+  open-project-swagger-on-edge:
+    cmds:
+    - powershell -Command "Start-Process 'microsoft-edge:http://localhost:8080/swagger/index.html'"
+  delayed-task:
+    desc: "Delay to docker deploy application"
+    cmds:
+      - powershell -Command "timeout /t 1 /nobreak"

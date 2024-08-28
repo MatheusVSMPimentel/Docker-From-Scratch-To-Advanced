@@ -1,0 +1,22 @@
+version: "3"
+
+tasks:
+  create-dotnet-webapi:
+    cmds:
+      - dotnet new webapi -n app-dotnet
+  enter-dotnet-folder-project:
+    cmds:
+      - "cd app-dotnet"
+  create-angular-project:
+    cmds:
+      - ng new angular-app  -s true -t false -g true --standalone false -S false
+  enter-angular-folder-project:
+    desc: You'll have to insert the command manually into CMD or PS
+    cmds:
+      - cd angular-app
+  compose-fullstack-application:
+    cmds:
+    - docker-compose -f ./Angular-Project-Image/docker-compose.fullstack.yml -p demo-application up -d
+  check-network:
+    cmds:
+      - docker network ls
