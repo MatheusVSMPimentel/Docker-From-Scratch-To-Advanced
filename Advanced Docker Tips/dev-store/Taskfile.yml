@@ -1,0 +1,28 @@
+version: "3"
+
+tasks:
+  add-volume-into-local-compose:
+    cmds:
+      -  'wsl -e sh -c "cd docker &&
+        printf \"\" >> docker-compose-local.yml &&
+        echo volumes: >> docker-compose-local.yml &&
+        echo \"    dpkeys:\" >> docker-compose-local.yml"'
+  build-local-compose-application:
+    cmds:
+      - 'powershell -Command "cd docker ;
+        docker-compose -f docker-compose-local.yml build"'
+  up-local-compose-application:
+    cmds: 
+      - 'powershell -Command "cd docker ;
+        docker-compose -f docker-compose-local.yml -p dev-store up -d"'
+  up-compose-application:
+    cmds: 
+      - 'powershell -Command "cd docker ;
+        docker-compose -f docker-compose.yml -p dev-store up -d"'
+  build-compose-application:
+    cmds: 
+      - 'powershell -Command "cd docker ;
+        docker-compose -f docker-compose.yml build"'
+  exec-container-shell:
+    cmds:
+    - docker exec -it dev-store-devstore-server-1 /bin/sh
