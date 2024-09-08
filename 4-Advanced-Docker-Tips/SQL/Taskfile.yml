@@ -1,0 +1,24 @@
+version: "3.8"
+
+tasks:
+  install-chocolatey:
+    cmds:
+      - 'powershell -Command "Import-Module Microsoft.PowerShell.Security ; Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString(''https://community.chocolatey.org/install.ps1''))"'
+  install-sed:
+    cmds:
+      - 'powershell -Command "choco install sed'
+  build-mssql:
+    cmds: 
+      - 'powershell -Command "docker build -t my-mssql:latest ."'
+  run-mssql-instance:
+    cmds: 
+      - 'powershell -Command "docker run --name my-mssql -d -p 1433:1435 my-mssql:latest  "'
+  comment-dockerfile:
+    cmds:
+      - 'powershell -Command "sed -i ''/^USER root$/,/^USER usuario-padrao$/ s/^/# /'' Dockerfile"'
+    desc: "Comenta uma seção específica do Dockerfile"
+  uncomment-dockerfile:
+    cmds:
+      - ''
+      - 'powershell -Command "sed -i ''/^# USER root$/,/^# USER usuario-padrao$/ s/^# //'' Dockerfile"'
+
