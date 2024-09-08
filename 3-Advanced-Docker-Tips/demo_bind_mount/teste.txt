@@ -1,0 +1,2 @@
+Teste de Binding
+Texto modificado via docker

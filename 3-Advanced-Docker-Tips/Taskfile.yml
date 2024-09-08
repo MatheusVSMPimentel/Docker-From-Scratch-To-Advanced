@@ -1,0 +1,90 @@
+version: "3.8"
+
+tasks:
+  run-interact-mount-biding-container:
+    cmds:
+    - powershell -Command 'docker run -it --mount type=bind,source="C:\Users\HomePC\source\repos\Docker-From-Scratch\3-Advanced-Docker-Tips\demo_bind_mount",target=/data ubuntu bash'
+    #browser to data insert the follow commands dir | cd /data | echo "Texto modificado via docker" >> /data/teste.txt
+  list-volumes:
+    cmds:
+    - docker volume ls
+  create-my-volume:
+    cmds:
+    - docker volume create my-volume
+  docker-interact-with-volume:
+    cmds: 
+      - 'powershell -Command "docker run --name origin -it -v my-volume:/app ubuntu bash"'
+  docker-interact-with-mount-volume:
+    cmds: 
+      - 'powershell -Command "docker run --name origin -it --mount type=volume,source=my-volume,target=/app ubuntu bash"'
+      ## create volume on bash: echo "Data on volume" > /app/test-volume.txt
+  other-container-interact-with-mount-volume:
+    cmds: 
+      - 'powershell -Command "docker run --name destiny -it --mount type=volume,source=my-volume,target=/app ubuntu bash"'
+      ## find the file with commands in bash: cd /app | ls | more test-volume.txt
+  docker-interact-mount-temp-file-system:
+    cmds: 
+      - 'powershell -Command "docker run --name origin-temp -it --mount type=tmpfs,destination=/mytmp ubuntu bash"'
+      ## write a new file with: echo "73mp0r4r1 D4t4" > /mytmp/test.tmpfs.txt
+      ## browser to mytmp folder: cd /mytmp
+      ## inspect the file: more test.tmpfs.txt
+      ## open another CMD and execute: task other-container-mount-temp-file-system
+  other-container-mount-temp-file-system:
+    cmds: 
+      - 'powershell -Command "docker run --name destiny-temp -it --tmpfs /mytmp ubuntu bash"'
+      ## browser to mytmp folder: cd /mytmp
+      ## inspect the folder: ls
+  list-containers:
+    cmds:
+    - docker ps -a
+  format-list-containers:
+    cmds:
+    ## I did get how to do this work so you have to copy and paste on CMD
+      - 'docker ps -a --format "{{.Names}}: {{.Image}}  ({{.Status}})"'
+  format-table-list-containers:
+    cmds:
+    ## I did get how to do this work so you have to copy and paste on CMD
+      - 'docker ps -a --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"'
+  format-json-list-containers:
+    cmds:
+    ## I did get how to do this work so you have to copy and paste on CMD
+      - 'docker ps -a --format "{{json .}}"'
+  format-description-list-containers:
+    cmds:
+    ## I did get how to do this work so you have to copy and paste on CMD
+      - 'docker ps -a --format "Container {{.Names}} using image: {{.Image}} has status: {{.Status}}"'
+  install-docker-buildx:
+    cmds:
+      - docker buildx install
+  docker-buildx-create-builder:
+    cmds:
+      - docker buildx create --name my-buildx --use
+  docker-buildx-initialize-builder:
+    cmds:
+      - docker buildx inspect --bootstrap my-buildx
+  docker-buildx-remove-builder:
+    cmds:
+      - docker buildx rm my-buildx
+  docker-buildx-create-builder-specific-platforms:
+    cmds:
+      - docker buildx create --name my-buildx --use --platform linux/amd64,linux/arm64
+  docker-buildx-inspect-builder:
+    cmds:
+      - docker buildx inspect my-buildx
+    ## initialize with command: task docker-buildx-initialize-builder
+  multiplatform-image-builder:
+    cmds: 
+      - 'powershell -Command "cd ../2-Advanced-Docker-Tips/ComposeDemo/app-angular/;
+        docker buildx build --platform linux/amd64,linux/arm64 -t matheusvsmpimentel/angular-multi:latest . --push
+        "'
+        ##remove the buildx my-builder for fastter builds: task docker-buildx-remove-builder
+  build-dotnet-demo:
+    cmds: 
+      - 'powershell -Command "cd ../2-Advanced-Docker-Tips/ComposeDemo/apidotnet/;
+        docker build -t demo-net .
+        "'
+  run-dotnet-demo:
+    cmds: 
+      - 'powershell -Command "cd ../2-Advanced-Docker-Tips/ComposeDemo/apidotnet/;
+        docker run demo-net 
+        "'
