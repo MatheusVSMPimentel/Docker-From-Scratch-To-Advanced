@@ -1,0 +1,43 @@
+version: "3.8"
+
+tasks:
+  build-app-angular:
+    cmds:
+      - 'powershell -Command "cd ComposeDemo/app-angular;
+        docker build -t matheusvsmpimentel/demo-spa:latest ."'
+  #login-docker:
+  #  cmds:
+  #    - echo "Digite seu nome de usuário:"
+  #    - 'powershell -Command "$DockerUser = Read-Host -Prompt Nome de usuário; docker login -u $DockerUser"'
+  #  silent: true
+  push-app-angular:
+    cmds:
+      - docker push matheusvsmpimentel/demo-spa:latest
+  build-and-push-app-angular:
+    cmds:
+      - 'powershell -Command "cd ComposeDemo/app-angular;
+        docker build -t matheusvsmpimentel/demo-spa:latest --push ."'
+  tag-image-angular-push-app-angular:
+    cmds:
+      -  docker image tag matheusvsmpimentel/demo-spa matheusvsmpimentel/demo-spa:latest    
+  tag-image-angular-push-app-angular-v1:
+    cmds:
+      -  docker image tag matheusvsmpimentel/demo-spa matheusvsmpimentel/demo-spa:v1.0.0    
+  tag-image-angular-push-app-angular-v1-release-candidate:
+    cmds:
+      -  docker image tag matheusvsmpimentel/demo-spa matheusvsmpimentel/demo-spa:v1.0.0_RC
+  docker-push-all:
+    cmds:
+      - docker image push -a matheusvsmpimentel/demo-spa
+  build-after-changes:
+    cmds:
+      - 'powershell -Command "cd ComposeDemo/app-angular;
+        docker build -t matheusvsmpimentel/demo-spa ."'
+  tag-after-changes:
+    cmds:
+      -  docker image tag matheusvsmpimentel/demo-spa matheusvsmpimentel/demo-spa:v2.0.0
+      -  docker image tag matheusvsmpimentel/demo-spa matheusvsmpimentel/demo-spa:v2.0.0_RTM
+  push-docker-compose:
+    cmds:
+      - 'powershell -Command "cd ComposeDemo;
+        docker-compose build; docker-compose push"'

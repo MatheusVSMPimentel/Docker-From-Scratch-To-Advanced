@@ -1,0 +1,32 @@
+version: "3"
+
+services:    
+    api-demo:
+        image: matheusvsmpimentel/api-demo:latest        
+        container_name: api-demo
+        build:
+          context: ./apidotnet
+          dockerfile: Dockerfile
+        environment:
+            ASPNETCORE_ENVIRONMENT: Production
+        restart: always
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+          interval: 10s
+          timeout: 5s
+          retries: 5 
+        ports:
+            - "5000:8080"
+
+    app-spa-demo:
+        image: matheusvsmpimentel/app-spa-demo:latest
+        container_name: app-spa-demo
+        build:
+          context: ./app-angular
+          dockerfile: Dockerfile
+        restart: always
+        ports:
+          - "8080:80"     
+        depends_on:
+          api-demo:
+            condition: service_healthy   
